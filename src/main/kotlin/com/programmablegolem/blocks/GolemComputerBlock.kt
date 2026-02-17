@@ -1,5 +1,6 @@
 package com.programmablegolem.blocks
 
+import com.mojang.serialization.MapCodec
 import com.programmablegolem.blockentity.GolemComputerBlockEntity
 import com.programmablegolem.blockentity.ModBlockEntities
 import com.programmablegolem.entity.GolemComponent
@@ -23,12 +24,16 @@ import net.minecraft.world.phys.BlockHitResult
 
 class GolemComputerBlock : BaseEntityBlock(BlockBehaviour.Properties.of().strength(3.5f).requiresCorrectToolForDrops()) {
 
+    override fun codec(): MapCodec<out BaseEntityBlock> = MapCodec.unit(this)
+
     override fun newBlockEntity(pos: BlockPos, state: BlockState): BlockEntity =
         GolemComputerBlockEntity(pos, state)
 
     override fun <T : BlockEntity> getTicker(level: Level, state: BlockState, type: BlockEntityType<T>): BlockEntityTicker<T>? {
         return if (level.isClientSide) null
-        else createTickerHelper(type, ModBlockEntities.GOLEM_COMPUTER, GolemComputerBlockEntity::tick)
+        else createTickerHelper(type, ModBlockEntities.GOLEM_COMPUTER) { lvl, pos, st, be ->
+            GolemComputerBlockEntity.tick(lvl, pos, st, be)
+        }
     }
 
     override fun getRenderShape(state: BlockState) = RenderShape.MODEL
@@ -39,8 +44,8 @@ class GolemComputerBlock : BaseEntityBlock(BlockBehaviour.Properties.of().streng
 
         if (be.connectedGolemUUID == null) {
             val box = AABB(pos).inflate(10.0)
-            val golem = level.getEntitiesOfClass(IronGolem::class.java, box).firstOrNull { golem ->
-                val comp = GolemComponent.get(golem)
+            val golem = level.getEntitiesOfClass(IronGolem::class.java, box).firstOrNull { g ->
+                val comp = GolemComponent.get(g)
                 comp.isCabled && comp.connectedPlayerUUID == player.uuid
             }
             if (golem != null) {
