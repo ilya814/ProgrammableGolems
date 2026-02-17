@@ -1,0 +1,16 @@
+{
+  "item.programmablegolem.golem_brain": "Golem Brain",
+  "item.programmablegolem.connection_cable": "Connection Cable",
+  "item.programmablegolem.golem_pickaxe": "Golem Pickaxe",
+  "item.programmablegolem.golem_sword": "Golem Sword",
+  "item.programmablegolem.golem_axe": "Golem Axe",
+  
+  "block.programmablegolem.golem_computer": "Golem Computer",
+  
+  "container.programmablegolem.golem_computer": "Golem Computer",
+  
+  "message.programmablegolem.upgrade_success": "Iron Golem upgraded with brain!",
+  "message.programmablegolem.cable_connected": "Cable connected to golem!",
+  "message.programmablegolem.task_programmed": "Task programmed successfully!",
+  "message.programmablegolem.cable_disconnected": "Cable disconnected!"
+}

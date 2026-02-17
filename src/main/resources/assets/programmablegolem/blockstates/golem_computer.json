@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "programmablegolem:block/golem_computer"
+    }
+  }
+}
