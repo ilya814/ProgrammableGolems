@@ -4,6 +4,7 @@ import com.programmablegolem.ProgrammableGolemMod
 import com.programmablegolem.ai.BuildMode
 import com.programmablegolem.ai.TaskType
 import com.programmablegolem.blockentity.GolemComputerBlockEntity
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
 import net.minecraft.core.BlockPos
 import net.minecraft.network.FriendlyByteBuf
@@ -12,14 +13,10 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload
 import net.minecraft.resources.ResourceLocation
 
 class ProgramGolemPayload(
-    val computerPos: BlockPos,
-    val taskType: TaskType,
-    val blockName: String?,
-    val toolName: String?,
-    val buildMode: BuildMode?,
-    val fromPos: BlockPos?,
-    val toPos: BlockPos?,
-    val anchorPos: BlockPos?,
+    val computerPos: BlockPos, val taskType: TaskType,
+    val blockName: String?, val toolName: String?,
+    val buildMode: BuildMode?, val fromPos: BlockPos?,
+    val toPos: BlockPos?, val anchorPos: BlockPos?,
     val schematicName: String?
 ) : CustomPacketPayload {
     companion object {
@@ -29,8 +26,7 @@ class ProgramGolemPayload(
         val CODEC: StreamCodec<FriendlyByteBuf, ProgramGolemPayload> =
             object : StreamCodec<FriendlyByteBuf, ProgramGolemPayload> {
                 override fun decode(buf: FriendlyByteBuf) = ProgramGolemPayload(
-                    buf.readBlockPos(),
-                    TaskType.valueOf(buf.readUtf()),
+                    buf.readBlockPos(), TaskType.valueOf(buf.readUtf()),
                     if (buf.readBoolean()) buf.readUtf() else null,
                     if (buf.readBoolean()) buf.readUtf() else null,
                     if (buf.readBoolean()) BuildMode.valueOf(buf.readUtf()) else null,
@@ -40,8 +36,7 @@ class ProgramGolemPayload(
                     if (buf.readBoolean()) buf.readUtf() else null
                 )
                 override fun encode(buf: FriendlyByteBuf, v: ProgramGolemPayload) {
-                    buf.writeBlockPos(v.computerPos)
-                    buf.writeUtf(v.taskType.name)
+                    buf.writeBlockPos(v.computerPos); buf.writeUtf(v.taskType.name)
                     buf.writeBoolean(v.blockName != null); v.blockName?.let { buf.writeUtf(it) }
                     buf.writeBoolean(v.toolName != null); v.toolName?.let { buf.writeUtf(it) }
                     buf.writeBoolean(v.buildMode != null); v.buildMode?.let { buf.writeUtf(it.name) }
@@ -70,10 +65,8 @@ class DisconnectCablePayload(val computerPos: BlockPos) : CustomPacketPayload {
 }
 
 class OpenScreenPayload(
-    val computerPos: BlockPos,
-    val isConnected: Boolean,
-    val isDownloading: Boolean,
-    val progress: Int
+    val computerPos: BlockPos, val isConnected: Boolean,
+    val isDownloading: Boolean, val progress: Int
 ) : CustomPacketPayload {
     companion object {
         val TYPE = CustomPacketPayload.Type<OpenScreenPayload>(
@@ -83,10 +76,8 @@ class OpenScreenPayload(
             object : StreamCodec<FriendlyByteBuf, OpenScreenPayload> {
                 override fun decode(buf: FriendlyByteBuf) = OpenScreenPayload(buf.readBlockPos(), buf.readBoolean(), buf.readBoolean(), buf.readInt())
                 override fun encode(buf: FriendlyByteBuf, v: OpenScreenPayload) {
-                    buf.writeBlockPos(v.computerPos)
-                    buf.writeBoolean(v.isConnected)
-                    buf.writeBoolean(v.isDownloading)
-                    buf.writeInt(v.progress)
+                    buf.writeBlockPos(v.computerPos); buf.writeBoolean(v.isConnected)
+                    buf.writeBoolean(v.isDownloading); buf.writeInt(v.progress)
                 }
             }
     }
@@ -95,7 +86,11 @@ class OpenScreenPayload(
 
 object ModNetworking {
     fun registerServerPackets() {
-        ServerPlayNetworking.registerGlobalReceiver(ProgramGolemPayload.TYPE, ProgramGolemPayload.CODEC) { payload, context ->
+        PayloadTypeRegistry.playC2S().register(ProgramGolemPayload.TYPE, ProgramGolemPayload.CODEC)
+        PayloadTypeRegistry.playC2S().register(DisconnectCablePayload.TYPE, DisconnectCablePayload.CODEC)
+        PayloadTypeRegistry.playS2C().register(OpenScreenPayload.TYPE, OpenScreenPayload.CODEC)
+
+        ServerPlayNetworking.registerGlobalReceiver(ProgramGolemPayload.TYPE) { payload, context ->
             context.server().execute {
                 val be = context.player().level().getBlockEntity(payload.computerPos)
                 if (be is GolemComputerBlockEntity) {
@@ -108,7 +103,7 @@ object ModNetworking {
             }
         }
 
-        ServerPlayNetworking.registerGlobalReceiver(DisconnectCablePayload.TYPE, DisconnectCablePayload.CODEC) { payload, context ->
+        ServerPlayNetworking.registerGlobalReceiver(DisconnectCablePayload.TYPE) { payload, context ->
             context.server().execute {
                 val be = context.player().level().getBlockEntity(payload.computerPos)
                 if (be is GolemComputerBlockEntity) be.disconnectGolem()
