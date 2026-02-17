@@ -28,6 +28,14 @@ dependencies {
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
 	modImplementation "net.fabricmc:fabric-language-kotlin:${project.fabric_kotlin_version}"
 }
+Replace it with this (versions hardcoded directly):
+dependencies {
+	minecraft "com.mojang:minecraft:1.21.1"
+	mappings loom.officialMojangMappings()
+	modImplementation "net.fabricmc:fabric-loader:0.15.11"
+	modImplementation "net.fabricmc.fabric-api:fabric-api:0.110.0+1.21.1"
+	modImplementation "net.fabricmc:fabric-language-kotlin:1.12.3+kotlin.2.0.21"
+}
 
 processResources {
 	inputs.property "version", project.version
