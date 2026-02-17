@@ -17,41 +17,29 @@ object ProgrammableGolemMod : ModInitializer {
 
     override fun onInitialize() {
         logger.info("Initializing Programmable Iron Golems Mod")
-        
-        // Register items, blocks, and other content
         ModItems.register()
         ModBlocks.register()
         ModBlockEntities.register()
         ModNetworking.registerServerPackets()
-        
-        // Register event handlers
         registerEventHandlers()
-        
-        logger.info("Programmable Iron Golems Mod initialized successfully!")
+        logger.info("Done!")
     }
-    
+
     private fun registerEventHandlers() {
-        // Handle right-clicking iron golems with items
-        UseEntityCallback.EVENT.register { player, world, hand, entity, hitResult ->
+        UseEntityCallback.EVENT.register { player, world, hand, entity, _ ->
             if (entity is IronGolem && !world.isClientSide) {
                 val stack = player.getItemInHand(hand)
-                val component = GolemComponent.get(entity)
-                
+                val data = GolemComponent.get(entity)
                 when {
-                    stack.`is`(ModItems.GOLEM_BRAIN) && !component.isUpgraded -> {
-                        // Upgrade golem with brain
-                        component.upgrade()
-                        if (!player.abilities.instabuild) {
-                            stack.shrink(1)
-                        }
+                    stack.`is`(ModItems.GOLEM_BRAIN) && !data.isUpgraded -> {
+                        data.isUpgraded = true
+                        if (!player.abilities.instabuild) stack.shrink(1)
                         InteractionResult.SUCCESS
                     }
-                    stack.`is`(ModItems.CONNECTION_CABLE) && component.isUpgraded -> {
-                        // Connect cable to golem
-                        component.connectCable(player.uuid)
-                        if (!player.abilities.instabuild) {
-                            stack.shrink(1)
-                        }
+                    stack.`is`(ModItems.CONNECTION_CABLE) && data.isUpgraded -> {
+                        data.isCabled = true
+                        data.connectedPlayerUUID = player.uuid
+                        if (!player.abilities.instabuild) stack.shrink(1)
                         InteractionResult.SUCCESS
                     }
                     else -> InteractionResult.PASS
