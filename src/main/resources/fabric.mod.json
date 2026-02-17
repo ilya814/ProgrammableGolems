@@ -1,45 +1,33 @@
 {
-	"schemaVersion": 1,
-	"id": "programmablegolem",
-	"version": "${version}",
-	"name": "Programmable Iron Golems",
-	"description": "Upgrade your Iron Golems with brains and weapons! Program them via computer to mine, fight, trade, and build automatically.",
-	"authors": [
-		"You"
-	],
-	"contact": {
-		"homepage": "https://fabricmc.net/",
-		"sources": "https://github.com/FabricMC/fabric-example-mod"
-	},
-	"license": "CC0-1.0",
-	"icon": "assets/programmablegolem/icon.png",
-	"environment": "*",
-	"entrypoints": {
-		"main": [
-			{
-				"value": "com.programmablegolem.ProgrammableGolemMod",
-				"adapter": "kotlin"
-			}
-		],
-		"client": [
-			{
-				"value": "com.programmablegolem.ProgrammableGolemClient",
-				"adapter": "kotlin"
-			}
-		]
-	},
-	"mixins": [
-		"programmablegolem.mixins.json",
-		{
-			"config": "programmablegolem.client.mixins.json",
-			"environment": "client"
-		}
-	],
-	"depends": {
-		"fabricloader": ">=0.18.4",
-		"minecraft": "~1.21.11",
-		"java": ">=21",
-		"fabric-api": "*",
-		"fabric-language-kotlin": "*"
-	}
-}
+  "schemaVersion": 1,
+  "id": "programmablegolem",
+  "version": "${version}",
+  "name": "Programmable Iron Golems",
+  "description": "Upgrade Iron Golems with brains and program them to work for you!",
+  "authors": [
+    "ilya814"
+  ],
+  "license": "MIT",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.programmablegolem.ProgrammableGolemMod"
+    ],
+    "client": [
+      "com.programmablegolem.ProgrammableGolemClient"
+    ]
+  },
+  "mixins": [
+    "programmablegolem.mixins.json",
+    {
+      "config": "programmablegolem.client.mixins.json",
+      "environment": "client"
+    }
+  ],
+  "depends": {
+    "fabricloader": ">=0.15.11",
+    "fabric-api": "*",
+    "fabric-language-kotlin": "*",
+    "minecraft": "~1.21.1"
+  }
+}		
