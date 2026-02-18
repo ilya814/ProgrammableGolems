@@ -17,6 +17,7 @@ class GolemData {
     var isCabled = false
     var connectedPlayerUUID: UUID? = null
     var currentTask: GolemTask? = null
+    val inventory: NonNullList<ItemStack> = NonNullList.withSize(72, ItemStack.EMPTY)
 }
 
 object GolemComponent {
@@ -32,6 +33,7 @@ object GolemComponent {
         t.putBoolean("Upgraded", data.isUpgraded)
         t.putBoolean("Cabled", data.isCabled)
         data.connectedPlayerUUID?.let { t.putUUID("ConnectedPlayer", it) }
+        ContainerHelper.saveAllItems(t, data.inventory)
         data.currentTask?.let { task ->
             val taskTag = CompoundTag()
             taskTag.putString("Type", task.type.name)
@@ -54,6 +56,7 @@ object GolemComponent {
             isUpgraded = t.getBoolean("Upgraded")
             isCabled = t.getBoolean("Cabled")
             if (t.hasUUID("ConnectedPlayer")) connectedPlayerUUID = t.getUUID("ConnectedPlayer")
+            ContainerHelper.loadAllItems(t, inventory)
             if (t.contains("Task")) {
                 val taskTag = t.getCompound("Task")
                 val type = TaskType.valueOf(taskTag.getString("Type"))
@@ -71,4 +74,28 @@ object GolemComponent {
         }
         dataMap[golem.uuid] = data
     }
+}
+fun addItemToInventory(golem: IronGolem, stack: ItemStack): Boolean {
+    val data = get(golem)
+    for (i in 0 until data.inventory.size) {
+        val slot = data.inventory[i]
+        if (slot.isEmpty) continue
+        if (ItemStack.isSameItemSameComponents(slot, stack)) {
+            val maxStack = slot.maxStackSize
+            val canAdd = maxStack - slot.count
+            if (canAdd > 0) {
+                val toAdd = minOf(canAdd, stack.count)
+                slot.grow(toAdd)
+                stack.shrink(toAdd)
+                if (stack.isEmpty) return true
+            }
+        }
+    }
+    for (i in 0 until data.inventory.size) {
+        if (data.inventory[i].isEmpty) {
+            data.inventory[i] = stack.copy()
+            return true
+        }
+    }
+    return false
 }
