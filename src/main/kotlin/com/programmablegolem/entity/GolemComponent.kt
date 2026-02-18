@@ -3,6 +3,9 @@ package com.programmablegolem.entity
 import com.programmablegolem.ai.BuildMode
 import com.programmablegolem.ai.GolemTask
 import com.programmablegolem.ai.TaskType
+import net.minecraft.core.NonNullList
+import net.minecraft.world.ContainerHelper
+import net.minecraft.world.item.ItemStack
 import net.minecraft.core.BlockPos
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.world.entity.animal.IronGolem
