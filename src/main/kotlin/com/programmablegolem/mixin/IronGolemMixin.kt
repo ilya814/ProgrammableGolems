@@ -4,6 +4,9 @@ import com.programmablegolem.ai.GolemBuildingGoal
 import com.programmablegolem.ai.GolemFightingGoal
 import com.programmablegolem.ai.GolemMiningGoal
 import com.programmablegolem.ai.GolemTradingGoal
+import com.programmablegolem.entity.GolemComponent
+import net.minecraft.core.HolderLookup
+import net.minecraft.nbt.CompoundTag
 import net.minecraft.world.entity.EntityType
 import net.minecraft.world.entity.animal.AbstractGolem
 import net.minecraft.world.entity.animal.IronGolem
@@ -26,5 +29,15 @@ abstract class IronGolemMixin(
         goalSelector.addGoal(1, GolemFightingGoal(golem))
         goalSelector.addGoal(1, GolemTradingGoal(golem))
         goalSelector.addGoal(1, GolemBuildingGoal(golem))
+    }
+
+    @Inject(method = ["addAdditionalSaveData"], at = [At("TAIL")])
+    private fun saveGolemData(tag: CompoundTag, registries: HolderLookup.Provider, ci: CallbackInfo) {
+        GolemComponent.saveToTag(this as IronGolem, tag, registries)
+    }
+
+    @Inject(method = ["readAdditionalSaveData"], at = [At("TAIL")])
+    private fun loadGolemData(tag: CompoundTag, registries: HolderLookup.Provider, ci: CallbackInfo) {
+        GolemComponent.loadFromTag(this as IronGolem, tag, registries)
     }
 }
