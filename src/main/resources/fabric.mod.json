@@ -16,14 +16,14 @@
     "value": "com.programmablegolem.ProgrammableGolemMod"
   }
 ]
-    ],
+    ,
     "client": [
   {
     "adapter": "kotlin",
     "value": "com.programmablegolem.ProgrammableGolemClient"
   }
 ]
-    ]
+    
   },
   "mixins": [
     "programmablegolem.mixins.json",
