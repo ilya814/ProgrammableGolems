@@ -11,10 +11,18 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "com.programmablegolem.ProgrammableGolemMod"
+  {
+    "adapter": "kotlin",
+    "value": "com.programmablegolem.ProgrammableGolemMod"
+  }
+]
     ],
     "client": [
-      "com.programmablegolem.ProgrammableGolemClient"
+  {
+    "adapter": "kotlin",
+    "value": "com.programmablegolem.ProgrammableGolemClient"
+  }
+]
     ]
   },
   "mixins": [
