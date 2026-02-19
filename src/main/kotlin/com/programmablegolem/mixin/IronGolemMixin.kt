@@ -22,13 +22,13 @@ abstract class IronGolemMixin(
     level: Level
 ) : AbstractGolem(entityType, level) {
 
-    @Inject(method = ["registerGoals"], at = [At("TAIL")])
+    @Inject(method = ["<init>(Lnet/minecraft/world/entity/EntityType;Lnet/minecraft/world/level/Level;)V"], at = [At("RETURN")])
     private fun injectCustomGoals(ci: CallbackInfo) {
         val golem = this as IronGolem
-        goalSelector.addGoal(1, GolemMiningGoal(golem))
-        goalSelector.addGoal(1, GolemFightingGoal(golem))
-        goalSelector.addGoal(1, GolemTradingGoal(golem))
-        goalSelector.addGoal(1, GolemBuildingGoal(golem))
+        golem.goalSelector.addGoal(1, GolemMiningGoal(golem))
+        golem.goalSelector.addGoal(1, GolemFightingGoal(golem))
+        golem.goalSelector.addGoal(1, GolemTradingGoal(golem))
+        golem.goalSelector.addGoal(1, GolemBuildingGoal(golem))
     }
 
     @Inject(method = ["addAdditionalSaveData"], at = [At("TAIL")])
