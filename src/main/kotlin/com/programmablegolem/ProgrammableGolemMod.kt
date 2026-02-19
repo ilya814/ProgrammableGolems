@@ -1,4 +1,3 @@
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents
 package com.programmablegolem
 
 import com.programmablegolem.blocks.ModBlocks
@@ -26,8 +25,7 @@ object ProgrammableGolemMod : ModInitializer {
         logger.info("Done!")
     }
 
-    private fun registerEventHandlers()
-    registerGolemAI(){
+    private fun registerEventHandlers() {
         UseEntityCallback.EVENT.register { player, world, hand, entity, _ ->
             if (entity is IronGolem && !world.isClientSide) {
                 val stack = player.getItemInHand(hand)
@@ -49,17 +47,6 @@ object ProgrammableGolemMod : ModInitializer {
             } else {
                 InteractionResult.PASS
             }
-        }
-    }
-}
-private fun registerGolemAI() {
-    ServerEntityEvents.ENTITY_LOAD.register { entity, _ ->
-        if (entity is IronGolem) {
-            val accessor = entity as? MobAccessor ?: return@register
-            accessor.getGoalSelector().addGoal(1, GolemMiningGoal(entity))
-            accessor.getGoalSelector().addGoal(1, GolemFightingGoal(entity))
-            accessor.getGoalSelector().addGoal(1, GolemTradingGoal(entity))
-            accessor.getGoalSelector().addGoal(1, GolemBuildingGoal(entity))
         }
     }
 }
