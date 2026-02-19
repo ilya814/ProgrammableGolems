@@ -1,44 +1,16 @@
 package com.programmablegolem.mixin
 
-import com.programmablegolem.ai.GolemBuildingGoal
-import com.programmablegolem.ai.GolemFightingGoal
-import com.programmablegolem.ai.GolemMiningGoal
-import com.programmablegolem.ai.GolemTradingGoal
 import com.programmablegolem.entity.GolemComponent
 import net.minecraft.core.HolderLookup
 import net.minecraft.nbt.CompoundTag
-import net.minecraft.world.entity.EntityType
-import net.minecraft.world.entity.ai.goal.GoalSelector
-import net.minecraft.world.entity.animal.AbstractGolem
 import net.minecraft.world.entity.animal.IronGolem
-import net.minecraft.world.level.Level
 import org.spongepowered.asm.mixin.Mixin
-import org.spongepowered.asm.mixin.gen.Accessor
 import org.spongepowered.asm.mixin.injection.At
 import org.spongepowered.asm.mixin.injection.Inject
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo
 
-@Mixin(net.minecraft.world.entity.Mob::class)
-interface MobAccessor {
-    @Accessor("goalSelector")
-    fun getGoalSelector(): GoalSelector
-}
-
 @Mixin(IronGolem::class)
-abstract class IronGolemMixin(
-    entityType: EntityType<out AbstractGolem>,
-    level: Level
-) : AbstractGolem(entityType, level) {
-
-    @Inject(method = ["<init>(Lnet/minecraft/world/entity/EntityType;Lnet/minecraft/world/level/Level;)V"], at = [At("RETURN")])
-    private fun injectCustomGoals(ci: CallbackInfo) {
-        val golem = this as IronGolem
-        val accessor = golem as MobAccessor
-        accessor.getGoalSelector().addGoal(1, GolemMiningGoal(golem))
-        accessor.getGoalSelector().addGoal(1, GolemFightingGoal(golem))
-        accessor.getGoalSelector().addGoal(1, GolemTradingGoal(golem))
-        accessor.getGoalSelector().addGoal(1, GolemBuildingGoal(golem))
-    }
+abstract class IronGolemMixin {
 
     @Inject(method = ["addAdditionalSaveData"], at = [At("TAIL")])
     private fun saveGolemData(tag: CompoundTag, registries: HolderLookup.Provider, ci: CallbackInfo) {
