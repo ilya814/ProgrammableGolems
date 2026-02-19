@@ -3,12 +3,13 @@ package com.programmablegolem.entity
 import com.programmablegolem.ai.BuildMode
 import com.programmablegolem.ai.GolemTask
 import com.programmablegolem.ai.TaskType
-import net.minecraft.core.NonNullList
-import net.minecraft.world.ContainerHelper
-import net.minecraft.world.item.ItemStack
 import net.minecraft.core.BlockPos
+import net.minecraft.core.HolderLookup
+import net.minecraft.core.NonNullList
 import net.minecraft.nbt.CompoundTag
+import net.minecraft.world.ContainerHelper
 import net.minecraft.world.entity.animal.IronGolem
+import net.minecraft.world.item.ItemStack
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
@@ -27,13 +28,14 @@ object GolemComponent {
         return dataMap.getOrPut(golem.uuid) { GolemData() }
     }
 
-    fun saveToTag(golem: IronGolem, tag: CompoundTag) {
+    fun saveToTag(golem: IronGolem, tag: CompoundTag, registries: HolderLookup.Provider) {
         val data = dataMap[golem.uuid] ?: return
         val t = CompoundTag()
         t.putBoolean("Upgraded", data.isUpgraded)
         t.putBoolean("Cabled", data.isCabled)
         data.connectedPlayerUUID?.let { t.putUUID("ConnectedPlayer", it) }
-        ContainerHelper.saveAllItems(t, data.inventory)
+        ContainerHelper.saveAllItems(t, data.inventory, registries)
+        
         data.currentTask?.let { task ->
             val taskTag = CompoundTag()
             taskTag.putString("Type", task.type.name)
@@ -49,14 +51,15 @@ object GolemComponent {
         tag.put("ProgrammableGolem", t)
     }
 
-    fun loadFromTag(golem: IronGolem, tag: CompoundTag) {
+    fun loadFromTag(golem: IronGolem, tag: CompoundTag, registries: HolderLookup.Provider) {
         if (!tag.contains("ProgrammableGolem")) return
         val t = tag.getCompound("ProgrammableGolem")
         val data = GolemData().apply {
             isUpgraded = t.getBoolean("Upgraded")
             isCabled = t.getBoolean("Cabled")
             if (t.hasUUID("ConnectedPlayer")) connectedPlayerUUID = t.getUUID("ConnectedPlayer")
-            ContainerHelper.loadAllItems(t, inventory)
+            ContainerHelper.loadAllItems(t, inventory, registries)
+            
             if (t.contains("Task")) {
                 val taskTag = t.getCompound("Task")
                 val type = TaskType.valueOf(taskTag.getString("Type"))
@@ -74,28 +77,34 @@ object GolemComponent {
         }
         dataMap[golem.uuid] = data
     }
-}
-fun addItemToInventory(golem: IronGolem, stack: ItemStack): Boolean {
-    val data = get(golem)
-    for (i in 0 until data.inventory.size) {
-        val slot = data.inventory[i]
-        if (slot.isEmpty) continue
-        if (ItemStack.isSameItemSameComponents(slot, stack)) {
-            val maxStack = slot.maxStackSize
-            val canAdd = maxStack - slot.count
-            if (canAdd > 0) {
-                val toAdd = minOf(canAdd, stack.count)
-                slot.grow(toAdd)
-                stack.shrink(toAdd)
-                if (stack.isEmpty) return true
+    
+    fun addItemToInventory(golem: IronGolem, stack: ItemStack): Boolean {
+        val data = get(golem)
+        var remaining = stack.copy()
+        
+        // Try merging with existing stacks
+        for (i in 0 until data.inventory.size) {
+            val slot = data.inventory[i]
+            if (slot.isEmpty) continue
+            if (ItemStack.isSameItemSameComponents(slot, stack)) {
+                val space = slot.maxStackSize - slot.count
+                if (space > 0) {
+                    val toAdd = minOf(space, remaining.count)
+                    slot.grow(toAdd)
+                    remaining.shrink(toAdd)
+                    if (remaining.isEmpty) return true
+                }
             }
         }
-    }
-    for (i in 0 until data.inventory.size) {
-        if (data.inventory[i].isEmpty) {
-            data.inventory[i] = stack.copy()
-            return true
+        
+        // Add to empty slots
+        for (i in 0 until data.inventory.size) {
+            if (data.inventory[i].isEmpty) {
+                data.inventory[i] = remaining
+                return true
+            }
         }
+        
+        return false
     }
-    return false
 }
