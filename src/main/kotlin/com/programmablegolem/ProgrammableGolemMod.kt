@@ -1,3 +1,4 @@
+import net.minecraft.network.chat.Component
 import com.programmablegolem.items.ModCreativeTab
 package com.programmablegolem
 
