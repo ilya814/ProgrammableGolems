@@ -121,8 +121,7 @@ class GolemComputerBlockEntity(
 
     override fun getUpdateTag(registries: HolderLookup.Provider): CompoundTag = saveWithoutMetadata(registries)
     override fun getUpdatePacket() = net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket.create(this)
-    override fun getDisplayName(): Component = Component.literal("Golem Computer")
-
+    
     companion object {
         fun tick(level: Level, pos: BlockPos, state: net.minecraft.world.level.block.state.BlockState, blockEntity: GolemComputerBlockEntity) {
             if (blockEntity.isDownloading) {
