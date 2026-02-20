@@ -1,3 +1,4 @@
+import com.programmablegolem.items.ModCreativeTab
 package com.programmablegolem
 
 import com.programmablegolem.blocks.ModBlocks
@@ -18,6 +19,7 @@ object ProgrammableGolemMod : ModInitializer {
     override fun onInitialize() {
         logger.info("Initializing Programmable Iron Golems Mod")
         ModItems.register()
+        ModCreativeTab.register()
         ModBlocks.register()
         ModBlockEntities.register()
         ModNetworking.registerServerPackets()
@@ -26,27 +28,31 @@ object ProgrammableGolemMod : ModInitializer {
     }
 
     private fun registerEventHandlers() {
-        UseEntityCallback.EVENT.register { player, world, hand, entity, _ ->
-            if (entity is IronGolem && !world.isClientSide) {
-                val stack = player.getItemInHand(hand)
-                val data = GolemComponent.get(entity)
-                when {
-                    stack.`is`(ModItems.GOLEM_BRAIN) && !data.isUpgraded -> {
-                        data.isUpgraded = true
-                        if (!player.abilities.instabuild) stack.shrink(1)
-                        InteractionResult.SUCCESS
-                    }
-                    stack.`is`(ModItems.CONNECTION_CABLE) && data.isUpgraded -> {
-                        data.isCabled = true
-                        data.connectedPlayerUUID = player.uuid
-                        if (!player.abilities.instabuild) stack.shrink(1)
-                        InteractionResult.SUCCESS
-                    }
-                    else -> InteractionResult.PASS
+    UseEntityCallback.EVENT.register { player, world, hand, entity, _ ->
+        if (entity is IronGolem && !world.isClientSide) {
+            val stack = player.getItemInHand(hand)
+            val data = GolemComponent.get(entity)
+            when {
+                stack.`is`(ModItems.GOLEM_BRAIN) && !data.isUpgraded -> {
+                    data.isUpgraded = true
+                    if (!player.abilities.instabuild) stack.shrink(1)
+                    InteractionResult.SUCCESS
                 }
-            } else {
-                InteractionResult.PASS
+                stack.`is`(ModItems.CONNECTION_CABLE) && data.isUpgraded && !data.isCabled -> {
+                    data.isCabled = true
+                    data.connectedPlayerUUID = player.uuid
+                    
+                    // FREEZE the golem - disable AI
+                    entity.setNoAi(true)
+                    
+                    if (!player.abilities.instabuild) stack.shrink(1)
+                    player.sendSystemMessage(Component.literal("§aGolem connected! Find a Golem Computer to program it."))
+                    InteractionResult.SUCCESS
+                }
+                else -> InteractionResult.PASS
             }
+        } else {
+            InteractionResult.PASS
         }
     }
-}
+    }
