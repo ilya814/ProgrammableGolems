@@ -95,12 +95,6 @@ fun disconnectGolem() {
     selectedBuildMode = null; buildFromPos = null; buildToPos = null
     schematicAnchor = null; schematicName = null; setChanged()
 }
-
-    fun disconnectGolem() {
-        connectedGolemUUID = null; isDownloading = false; downloadProgress = 0
-        selectedTask = null; selectedBlockName = null; selectedToolName = null
-        selectedBuildMode = null; buildFromPos = null; buildToPos = null
-        schematicAnchor = null; schematicName = null; setChanged()
     }
 
     override fun saveAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {
