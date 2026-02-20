@@ -78,7 +78,6 @@ class GolemComputerBlockEntity(pos: BlockPos, state: BlockState) :
     }
     setChanged()
 }
-Also update disconnectGolem():
 fun disconnectGolem() {
     val uuid = connectedGolemUUID
     if (uuid != null && level != null) {
