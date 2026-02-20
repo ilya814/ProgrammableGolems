@@ -165,16 +165,14 @@ class GolemComputerScreen(
                     val inputY = optionsY + 40
                     
                     // From coordinates
-                    font.drawShadow(null, Component.literal("From:"), centerX - 100f, inputY.toFloat(), 0xFFFFFF)
-                    fromXBox = createNumberBox(centerX - 60, inputY, 40)
-                    fromYBox = createNumberBox(centerX - 15, inputY, 40)
-                    fromZBox = createNumberBox(centerX + 30, inputY, 40)
+                    graphics.drawString(font, Component.literal("From:"), centerX - 100f, inputY.toFloat(), 0xFFFFFF)
+graphics.drawString(font, Component.literal("To:"), centerX - 100f, (inputY + 30).toFloat(), 0xFFFFFF)
+graphics.drawString(font, Component.literal("Anchor:"), centerX - 100f, inputY.toFloat(), 0xFFFFFF)
                     
                     // To coordinates
-                    font.drawShadow(null, Component.literal("To:"), centerX - 100f, (inputY + 30).toFloat(), 0xFFFFFF)
-                    toXBox = createNumberBox(centerX - 60, inputY + 30, 40)
-                    toYBox = createNumberBox(centerX - 15, inputY + 30, 40)
-                    toZBox = createNumberBox(centerX + 30, inputY + 30, 40)
+                    graphics.drawString(font, Component.literal("From:"), centerX - 100f, inputY.toFloat(), 0xFFFFFF)
+graphics.drawString(font, Component.literal("To:"), centerX - 100f, (inputY + 30).toFloat(), 0xFFFFFF)
+graphics.drawString(font, Component.literal("Anchor:"), centerX - 100f, inputY.toFloat(), 0xFFFFFF)
                     
                     if (fromXBox!!.value.isNotEmpty() && toXBox!!.value.isNotEmpty()) {
                         createDownloadButton()
@@ -185,10 +183,9 @@ class GolemComputerScreen(
                     val inputY = optionsY + 40
                     
                     // Anchor point
-                    font.drawShadow(null, Component.literal("Anchor:"), centerX - 100f, inputY.toFloat(), 0xFFFFFF)
-                    anchorXBox = createNumberBox(centerX - 60, inputY, 40)
-                    anchorYBox = createNumberBox(centerX - 15, inputY, 40)
-                    anchorZBox = createNumberBox(centerX + 30, inputY, 40)
+                    graphics.drawString(font, Component.literal("From:"), centerX - 100f, inputY.toFloat(), 0xFFFFFF)
+graphics.drawString(font, Component.literal("To:"), centerX - 100f, (inputY + 30).toFloat(), 0xFFFFFF)
+graphics.drawString(font, Component.literal("Anchor:"), centerX - 100f, inputY.toFloat(), 0xFFFFFF)
                     
                     // Schematic picker
                     val schematics = listOf("Kelp Farm", "Wheat Farm", "Small House", "Castle Tower", "Bridge", "Wall")
@@ -288,14 +285,14 @@ class GolemComputerScreen(
     }
     
     private fun renderMatrixBackground(graphics: GuiGraphics, progress: Int) {
-        val random = Random(progress.toLong())
+        val random = kotlin.random.Random(progress)
         for (i in 0 until 50) {
             val x = random.nextInt(width)
             val y = random.nextInt(height)
             val char = ('0'..'1').random(random)
             graphics.drawString(font, char.toString(), x, y, MATRIX_GREEN)
         }
-    }
+    val char = ('0'..'1').random()}
     
     override fun isPauseScreen() = false
 }
