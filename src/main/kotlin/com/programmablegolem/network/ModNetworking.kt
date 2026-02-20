@@ -94,12 +94,16 @@ object ModNetworking {
             context.server().execute {
                 val be = context.player().level().getBlockEntity(payload.computerPos)
                 if (be is GolemComputerBlockEntity) {
-                    be.startProgramming(
-                        payload.taskType, payload.blockName, payload.toolName,
-                        payload.buildMode, payload.fromPos, payload.toPos,
-                        payload.anchorPos, payload.schematicName
-                    )
-                }
+    be.selectedTask = payload.taskType
+    be.selectedBlockName = payload.blockName
+    be.selectedToolName = payload.toolName
+    be.selectedBuildMode = payload.buildMode
+    be.buildFromPos = payload.fromPos
+    be.buildToPos = payload.toPos
+    be.schematicAnchor = payload.anchorPos
+    be.schematicName = payload.schematicName
+    be.startDownload()
+}
             }
         }
 
