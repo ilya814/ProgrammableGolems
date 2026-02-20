@@ -13,7 +13,7 @@ object ScreenOpener {
         
         if (blockEntity is GolemComputerBlockEntity) {
             minecraft.setScreen(
-                GolemComputerScreen(
+                context.client().setScreen(GolemComputerScreen(payload.blockPos, payload.golemUUID, payload.isDownloading, payload.downloadProgress))
                     pos,
                     blockEntity.connectedGolemUUID != null,
                     blockEntity.isDownloading,
