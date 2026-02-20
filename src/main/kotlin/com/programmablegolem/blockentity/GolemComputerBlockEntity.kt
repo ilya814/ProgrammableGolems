@@ -60,21 +60,42 @@ class GolemComputerBlockEntity(pos: BlockPos, state: BlockState) :
     }
 
     private fun completeDownload(world: Level) {
-        isDownloading = false; downloadProgress = 0
-        val uuid = connectedGolemUUID ?: run { setChanged(); return }
+    isDownloading = false; downloadProgress = 0
+    val uuid = connectedGolemUUID ?: run { setChanged(); return }
+    val box = AABB(blockPos).inflate(20.0)
+    val golem = world.getEntitiesOfClass(IronGolem::class.java, box).firstOrNull { it.uuid == uuid }
+    golem?.let {
+        val data = GolemComponent.get(it)
+        val task = selectedTask ?: return@let
+        data.currentTask = GolemTask(
+            task, selectedBlockName, selectedToolName,
+            selectedBuildMode, buildFromPos, buildToPos, schematicAnchor, schematicName
+        )
+        data.isCabled = false
+        
+        // UNFREEZE golem - enable AI
+        it.setNoAi(false)
+    }
+    setChanged()
+}
+Also update disconnectGolem():
+fun disconnectGolem() {
+    val uuid = connectedGolemUUID
+    if (uuid != null && level != null) {
         val box = AABB(blockPos).inflate(20.0)
-        val golem = world.getEntitiesOfClass(IronGolem::class.java, box).firstOrNull { it.uuid == uuid }
+        val golem = level!!.getEntitiesOfClass(IronGolem::class.java, box).firstOrNull { it.uuid == uuid }
         golem?.let {
             val data = GolemComponent.get(it)
-            val task = selectedTask ?: return@let
-            data.currentTask = GolemTask(
-                task, selectedBlockName, selectedToolName,
-                selectedBuildMode, buildFromPos, buildToPos, schematicAnchor, schematicName
-            )
             data.isCabled = false
+            it.setNoAi(false) // UNFREEZE
         }
-        setChanged()
     }
+    
+    connectedGolemUUID = null; isDownloading = false; downloadProgress = 0
+    selectedTask = null; selectedBlockName = null; selectedToolName = null
+    selectedBuildMode = null; buildFromPos = null; buildToPos = null
+    schematicAnchor = null; schematicName = null; setChanged()
+}
 
     fun disconnectGolem() {
         connectedGolemUUID = null; isDownloading = false; downloadProgress = 0
