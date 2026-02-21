@@ -8,14 +8,14 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
 object ProgrammableGolemClient : ClientModInitializer {
     override fun onInitializeClient() {
         ClientPlayNetworking.registerGlobalReceiver(OpenScreenPayload.TYPE) { payload, context ->
+            val pos = payload.blockPos
+            val uuid = payload.golemUUID
+            val downloading = payload.isDownloading
+            val progress = payload.downloadProgress
+            
             context.client().execute {
                 context.client().setScreen(
-                    GolemComputerScreen(
-                        payload.blockPos,
-                        payload.golemUUID,
-                        payload.isDownloading,
-                        payload.downloadProgress
-                    )
+                    GolemComputerScreen(pos, uuid, downloading, progress)
                 )
             }
         }
