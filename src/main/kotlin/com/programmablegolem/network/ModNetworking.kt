@@ -11,75 +11,103 @@ import net.minecraft.network.FriendlyByteBuf
 import net.minecraft.network.codec.StreamCodec
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload
 import net.minecraft.resources.ResourceLocation
+import java.util.*
 
-class ProgramGolemPayload(
-    val computerPos: BlockPos, val taskType: TaskType,
-    val blockName: String?, val toolName: String?,
-    val buildMode: BuildMode?, val fromPos: BlockPos?,
-    val toPos: BlockPos?, val anchorPos: BlockPos?,
+data class ProgramGolemPayload(
+    val blockPos: BlockPos,
+    val taskType: TaskType,
+    val blockName: String?,
+    val toolName: String?,
+    val buildMode: BuildMode?,
+    val fromPos: BlockPos?,
+    val toPos: BlockPos?,
+    val anchorPos: BlockPos?,
     val schematicName: String?
 ) : CustomPacketPayload {
     companion object {
         val TYPE = CustomPacketPayload.Type<ProgramGolemPayload>(
             ResourceLocation.fromNamespaceAndPath(ProgrammableGolemMod.MOD_ID, "program_golem")
         )
-        val CODEC: StreamCodec<FriendlyByteBuf, ProgramGolemPayload> =
-            object : StreamCodec<FriendlyByteBuf, ProgramGolemPayload> {
-                override fun decode(buf: FriendlyByteBuf) = ProgramGolemPayload(
-                    buf.readBlockPos(), TaskType.valueOf(buf.readUtf()),
-                    if (buf.readBoolean()) buf.readUtf() else null,
-                    if (buf.readBoolean()) buf.readUtf() else null,
-                    if (buf.readBoolean()) BuildMode.valueOf(buf.readUtf()) else null,
-                    if (buf.readBoolean()) buf.readBlockPos() else null,
-                    if (buf.readBoolean()) buf.readBlockPos() else null,
-                    if (buf.readBoolean()) buf.readBlockPos() else null,
-                    if (buf.readBoolean()) buf.readUtf() else null
-                )
-                override fun encode(buf: FriendlyByteBuf, v: ProgramGolemPayload) {
-                    buf.writeBlockPos(v.computerPos); buf.writeUtf(v.taskType.name)
-                    buf.writeBoolean(v.blockName != null); v.blockName?.let { buf.writeUtf(it) }
-                    buf.writeBoolean(v.toolName != null); v.toolName?.let { buf.writeUtf(it) }
-                    buf.writeBoolean(v.buildMode != null); v.buildMode?.let { buf.writeUtf(it.name) }
-                    buf.writeBoolean(v.fromPos != null); v.fromPos?.let { buf.writeBlockPos(it) }
-                    buf.writeBoolean(v.toPos != null); v.toPos?.let { buf.writeBlockPos(it) }
-                    buf.writeBoolean(v.anchorPos != null); v.anchorPos?.let { buf.writeBlockPos(it) }
-                    buf.writeBoolean(v.schematicName != null); v.schematicName?.let { buf.writeUtf(it) }
-                }
+        val CODEC: StreamCodec<FriendlyByteBuf, ProgramGolemPayload> = object : StreamCodec<FriendlyByteBuf, ProgramGolemPayload> {
+            override fun decode(buf: FriendlyByteBuf): ProgramGolemPayload {
+                val pos = buf.readBlockPos()
+                val task = TaskType.valueOf(buf.readUtf())
+                val block = if (buf.readBoolean()) buf.readUtf() else null
+                val tool = if (buf.readBoolean()) buf.readUtf() else null
+                val mode = if (buf.readBoolean()) BuildMode.valueOf(buf.readUtf()) else null
+                val from = if (buf.readBoolean()) buf.readBlockPos() else null
+                val to = if (buf.readBoolean()) buf.readBlockPos() else null
+                val anchor = if (buf.readBoolean()) buf.readBlockPos() else null
+                val schem = if (buf.readBoolean()) buf.readUtf() else null
+                return ProgramGolemPayload(pos, task, block, tool, mode, from, to, anchor, schem)
             }
+            override fun encode(buf: FriendlyByteBuf, value: ProgramGolemPayload) {
+                buf.writeBlockPos(value.blockPos)
+                buf.writeUtf(value.taskType.name)
+                buf.writeBoolean(value.blockName != null)
+                value.blockName?.let { buf.writeUtf(it) }
+                buf.writeBoolean(value.toolName != null)
+                value.toolName?.let { buf.writeUtf(it) }
+                buf.writeBoolean(value.buildMode != null)
+                value.buildMode?.let { buf.writeUtf(it.name) }
+                buf.writeBoolean(value.fromPos != null)
+                value.fromPos?.let { buf.writeBlockPos(it) }
+                buf.writeBoolean(value.toPos != null)
+                value.toPos?.let { buf.writeBlockPos(it) }
+                buf.writeBoolean(value.anchorPos != null)
+                value.anchorPos?.let { buf.writeBlockPos(it) }
+                buf.writeBoolean(value.schematicName != null)
+                value.schematicName?.let { buf.writeUtf(it) }
+            }
+        }
     }
     override fun type() = TYPE
 }
 
-class DisconnectCablePayload(val computerPos: BlockPos) : CustomPacketPayload {
+data class DisconnectCablePayload(
+    val blockPos: BlockPos
+) : CustomPacketPayload {
     companion object {
         val TYPE = CustomPacketPayload.Type<DisconnectCablePayload>(
             ResourceLocation.fromNamespaceAndPath(ProgrammableGolemMod.MOD_ID, "disconnect_cable")
         )
-        val CODEC: StreamCodec<FriendlyByteBuf, DisconnectCablePayload> =
-            object : StreamCodec<FriendlyByteBuf, DisconnectCablePayload> {
-                override fun decode(buf: FriendlyByteBuf) = DisconnectCablePayload(buf.readBlockPos())
-                override fun encode(buf: FriendlyByteBuf, v: DisconnectCablePayload) { buf.writeBlockPos(v.computerPos) }
+        val CODEC: StreamCodec<FriendlyByteBuf, DisconnectCablePayload> = object : StreamCodec<FriendlyByteBuf, DisconnectCablePayload> {
+            override fun decode(buf: FriendlyByteBuf) = DisconnectCablePayload(buf.readBlockPos())
+            override fun encode(buf: FriendlyByteBuf, value: DisconnectCablePayload) {
+                buf.writeBlockPos(value.blockPos)
             }
+        }
     }
     override fun type() = TYPE
 }
 
-class OpenScreenPayload(
-    val computerPos: BlockPos, val isConnected: Boolean,
-    val isDownloading: Boolean, val progress: Int
+data class OpenScreenPayload(
+    val blockPos: BlockPos,
+    val golemUUID: UUID?,
+    val isDownloading: Boolean,
+    val downloadProgress: Int
 ) : CustomPacketPayload {
     companion object {
         val TYPE = CustomPacketPayload.Type<OpenScreenPayload>(
             ResourceLocation.fromNamespaceAndPath(ProgrammableGolemMod.MOD_ID, "open_screen")
         )
-        val CODEC: StreamCodec<FriendlyByteBuf, OpenScreenPayload> =
-            object : StreamCodec<FriendlyByteBuf, OpenScreenPayload> {
-                override fun decode(buf: FriendlyByteBuf) = OpenScreenPayload(buf.readBlockPos(), buf.readBoolean(), buf.readBoolean(), buf.readInt())
-                override fun encode(buf: FriendlyByteBuf, v: OpenScreenPayload) {
-                    buf.writeBlockPos(v.computerPos); buf.writeBoolean(v.isConnected)
-                    buf.writeBoolean(v.isDownloading); buf.writeInt(v.progress)
-                }
+        val CODEC: StreamCodec<FriendlyByteBuf, OpenScreenPayload> = object : StreamCodec<FriendlyByteBuf, OpenScreenPayload> {
+            override fun decode(buf: FriendlyByteBuf): OpenScreenPayload {
+                val pos = buf.readBlockPos()
+                val hasUUID = buf.readBoolean()
+                val uuid = if (hasUUID) buf.readUUID() else null
+                val downloading = buf.readBoolean()
+                val progress = buf.readInt()
+                return OpenScreenPayload(pos, uuid, downloading, progress)
             }
+            override fun encode(buf: FriendlyByteBuf, value: OpenScreenPayload) {
+                buf.writeBlockPos(value.blockPos)
+                buf.writeBoolean(value.golemUUID != null)
+                value.golemUUID?.let { buf.writeUUID(it) }
+                buf.writeBoolean(value.isDownloading)
+                buf.writeInt(value.downloadProgress)
+            }
+        }
     }
     override fun type() = TYPE
 }
@@ -89,28 +117,32 @@ object ModNetworking {
         PayloadTypeRegistry.playC2S().register(ProgramGolemPayload.TYPE, ProgramGolemPayload.CODEC)
         PayloadTypeRegistry.playC2S().register(DisconnectCablePayload.TYPE, DisconnectCablePayload.CODEC)
         PayloadTypeRegistry.playS2C().register(OpenScreenPayload.TYPE, OpenScreenPayload.CODEC)
-
+        
         ServerPlayNetworking.registerGlobalReceiver(ProgramGolemPayload.TYPE) { payload, context ->
             context.server().execute {
-                val be = context.player().level().getBlockEntity(payload.computerPos)
+                val player = context.player()
+                val be = player.level().getBlockEntity(payload.blockPos)
                 if (be is GolemComputerBlockEntity) {
-    be.selectedTask = payload.taskType
-    be.selectedBlockName = payload.blockName
-    be.selectedToolName = payload.toolName
-    be.selectedBuildMode = payload.buildMode
-    be.buildFromPos = payload.fromPos
-    be.buildToPos = payload.toPos
-    be.schematicAnchor = payload.anchorPos
-    be.schematicName = payload.schematicName
-    be.startDownload()
-}
+                    be.selectedTask = payload.taskType
+                    be.selectedBlockName = payload.blockName
+                    be.selectedToolName = payload.toolName
+                    be.selectedBuildMode = payload.buildMode
+                    be.buildFromPos = payload.fromPos
+                    be.buildToPos = payload.toPos
+                    be.schematicAnchor = payload.anchorPos
+                    be.schematicName = payload.schematicName
+                    be.startDownload()
+                }
             }
         }
-
+        
         ServerPlayNetworking.registerGlobalReceiver(DisconnectCablePayload.TYPE) { payload, context ->
             context.server().execute {
-                val be = context.player().level().getBlockEntity(payload.computerPos)
-                if (be is GolemComputerBlockEntity) be.disconnectGolem()
+                val player = context.player()
+                val be = player.level().getBlockEntity(payload.blockPos)
+                if (be is GolemComputerBlockEntity) {
+                    be.disconnectGolem()
+                }
             }
         }
     }
