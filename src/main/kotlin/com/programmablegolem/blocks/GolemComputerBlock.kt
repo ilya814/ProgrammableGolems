@@ -55,7 +55,7 @@ class GolemComputerBlock : BaseEntityBlock(BlockBehaviour.Properties.of().streng
         }
 
         if (player is ServerPlayer) {
-            ServerPlayNetworking.send(player, OpenScreenPayload(pos, be.connectedGolemUUID != null, be.isDownloading, be.downloadProgress))
+            ServerPlayNetworking.send(player, OpenScreenPayload(pos, blockEntity.connectedGolemUUID, blockEntity.isDownloading, blockEntity.downloadProgress))
         }
         return InteractionResult.SUCCESS
     }
