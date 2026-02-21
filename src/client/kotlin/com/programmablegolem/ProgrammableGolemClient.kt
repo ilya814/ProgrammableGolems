@@ -10,7 +10,12 @@ object ProgrammableGolemClient : ClientModInitializer {
         ClientPlayNetworking.registerGlobalReceiver(OpenScreenPayload.TYPE) { payload, context ->
             context.client().execute {
                 context.client().setScreen(
-                    context.client().setScreen(GolemComputerScreen(payload.blockPos, payload.golemUUID, payload.isDownloading, payload.downloadProgress))
+                    GolemComputerScreen(
+                        payload.blockPos,
+                        payload.golemUUID,
+                        payload.isDownloading,
+                        payload.downloadProgress
+                    )
                 )
             }
         }
