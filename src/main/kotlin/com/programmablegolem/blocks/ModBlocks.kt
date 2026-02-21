@@ -12,7 +12,11 @@ import net.minecraft.world.level.block.Block
 
 object ModBlocks {
     // Blocks
-    val GOLEM_COMPUTER = GolemComputerBlock()
+    val GOLEM_COMPUTER: Block = GolemComputerBlock(
+    BlockBehaviour.Properties.of()
+        .strength(3.5f)
+        .requiresCorrectToolForDrops()
+)
     
     fun register() {
         // Register blocks
