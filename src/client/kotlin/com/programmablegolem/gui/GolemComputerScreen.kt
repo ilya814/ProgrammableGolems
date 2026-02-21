@@ -1,6 +1,5 @@
 package com.programmablegolem.gui
 
-import com.mojang.blaze3d.systems.RenderSystem
 import com.programmablegolem.ai.BuildMode
 import com.programmablegolem.ai.TaskType
 import com.programmablegolem.network.DisconnectCablePayload
@@ -12,7 +11,6 @@ import net.minecraft.client.gui.components.EditBox
 import net.minecraft.client.gui.screens.Screen
 import net.minecraft.core.BlockPos
 import net.minecraft.network.chat.Component
-import net.minecraft.resources.ResourceLocation
 import java.util.*
 
 class GolemComputerScreen(
@@ -28,7 +26,6 @@ class GolemComputerScreen(
     private var selectedBuildMode: BuildMode? = null
     private var selectedSchematic: String? = null
     
-    // Text input boxes
     private var fromXBox: EditBox? = null
     private var fromYBox: EditBox? = null
     private var fromZBox: EditBox? = null
@@ -46,7 +43,6 @@ class GolemComputerScreen(
     
     private val MATRIX_GREEN = 0xFF00FF00.toInt()
     private val DARK_BG = 0xC0000000.toInt()
-    private val BUTTON_GREEN = 0xFF00AA00.toInt()
     
     override fun init() {
         super.init()
@@ -54,7 +50,6 @@ class GolemComputerScreen(
         val centerX = width / 2
         val startY = 40
         
-        // Task selection buttons (top)
         taskButtons.clear()
         val taskTypes = listOf(
             TaskType.MINING to "⛏ Mining",
@@ -78,7 +73,6 @@ class GolemComputerScreen(
             taskButtons.add(button)
         }
         
-        // Disconnect button (bottom right)
         disconnectButton = Button.builder(Component.literal("❌ Disconnect Cable")) {
             ClientPlayNetworking.send(DisconnectCablePayload(blockPos))
             onClose()
@@ -91,15 +85,12 @@ class GolemComputerScreen(
     }
     
     private fun rebuildOptions() {
-        // Clear old option buttons
         optionButtons.forEach { removeWidget(it) }
         optionButtons.clear()
         
-        // Clear text boxes
         listOf(fromXBox, fromYBox, fromZBox, toXBox, toYBox, toZBox, anchorXBox, anchorYBox, anchorZBox)
             .forEach { it?.let { box -> removeWidget(box) } }
         
-        // Remove download button
         downloadButton?.let { removeWidget(it) }
         downloadButton = null
         
@@ -108,10 +99,8 @@ class GolemComputerScreen(
         
         when (selectedTask) {
             TaskType.MINING -> {
-                // Block selection button
                 val blockBtn = Button.builder(Component.literal("Choose Block: ${selectedBlock ?: "None"}")) {
-                    // TODO: Open item picker screen
-                    selectedBlock = "minecraft:stone" // Placeholder
+                    selectedBlock = "minecraft:stone"
                     rebuildOptions()
                 }
                 .bounds(centerX - 100, optionsY, 200, 20)
@@ -119,10 +108,8 @@ class GolemComputerScreen(
                 addRenderableWidget(blockBtn)
                 optionButtons.add(blockBtn)
                 
-                // Tool selection button
                 val toolBtn = Button.builder(Component.literal("Choose Tool: ${selectedTool ?: "None"}")) {
-                    // TODO: Open item picker screen
-                    selectedTool = "minecraft:iron_pickaxe" // Placeholder
+                    selectedTool = "minecraft:iron_pickaxe"
                     rebuildOptions()
                 }
                 .bounds(centerX - 100, optionsY + 30, 200, 20)
@@ -136,12 +123,10 @@ class GolemComputerScreen(
             }
             
             TaskType.FIGHTING, TaskType.TRADING -> {
-                // These tasks need no extra options
                 createDownloadButton()
             }
             
             TaskType.BUILDING -> {
-                // Build mode selection
                 val coordBtn = Button.builder(Component.literal(if (selectedBuildMode == BuildMode.COORDINATES) "▶ Coordinates" else "Coordinates")) {
                     selectedBuildMode = BuildMode.COORDINATES
                     rebuildOptions()
@@ -160,19 +145,16 @@ class GolemComputerScreen(
                 addRenderableWidget(schematicBtn)
                 optionButtons.add(schematicBtn)
                 
-                // Show coordinate inputs if selected
                 if (selectedBuildMode == BuildMode.COORDINATES) {
                     val inputY = optionsY + 40
                     
-                    // From coordinates
-                    graphics.drawString(font, Component.literal("From:"), centerX - 100f, inputY.toFloat(), 0xFFFFFF)
-graphics.drawString(font, Component.literal("To:"), centerX - 100f, (inputY + 30).toFloat(), 0xFFFFFF)
-graphics.drawString(font, Component.literal("Anchor:"), centerX - 100f, inputY.toFloat(), 0xFFFFFF)
+                    fromXBox = createNumberBox(centerX - 60, inputY, 40)
+                    fromYBox = createNumberBox(centerX - 15, inputY, 40)
+                    fromZBox = createNumberBox(centerX + 30, inputY, 40)
                     
-                    // To coordinates
-                    graphics.drawString(font, Component.literal("From:"), centerX - 100f, inputY.toFloat(), 0xFFFFFF)
-graphics.drawString(font, Component.literal("To:"), centerX - 100f, (inputY + 30).toFloat(), 0xFFFFFF)
-graphics.drawString(font, Component.literal("Anchor:"), centerX - 100f, inputY.toFloat(), 0xFFFFFF)
+                    toXBox = createNumberBox(centerX - 60, inputY + 30, 40)
+                    toYBox = createNumberBox(centerX - 15, inputY + 30, 40)
+                    toZBox = createNumberBox(centerX + 30, inputY + 30, 40)
                     
                     if (fromXBox!!.value.isNotEmpty() && toXBox!!.value.isNotEmpty()) {
                         createDownloadButton()
@@ -182,15 +164,13 @@ graphics.drawString(font, Component.literal("Anchor:"), centerX - 100f, inputY.t
                 if (selectedBuildMode == BuildMode.SCHEMATIC) {
                     val inputY = optionsY + 40
                     
-                    // Anchor point
-                    graphics.drawString(font, Component.literal("From:"), centerX - 100f, inputY.toFloat(), 0xFFFFFF)
-graphics.drawString(font, Component.literal("To:"), centerX - 100f, (inputY + 30).toFloat(), 0xFFFFFF)
-graphics.drawString(font, Component.literal("Anchor:"), centerX - 100f, inputY.toFloat(), 0xFFFFFF)
+                    anchorXBox = createNumberBox(centerX - 60, inputY, 40)
+                    anchorYBox = createNumberBox(centerX - 15, inputY, 40)
+                    anchorZBox = createNumberBox(centerX + 30, inputY, 40)
                     
-                    // Schematic picker
                     val schematics = listOf("Kelp Farm", "Wheat Farm", "Small House", "Castle Tower", "Bridge", "Wall")
                     val schematicBtn = Button.builder(Component.literal("Schematic: ${selectedSchematic ?: "Choose..."}")) {
-                        selectedSchematic = schematics.random() // TODO: Proper picker
+                        selectedSchematic = schematics.random()
                         rebuildOptions()
                     }
                     .bounds(centerX - 100, inputY + 30, 200, 20)
@@ -204,6 +184,7 @@ graphics.drawString(font, Component.literal("Anchor:"), centerX - 100f, inputY.t
                 }
             }
             
+            TaskType.IDLE -> {}
             null -> {}
         }
     }
@@ -257,25 +238,20 @@ graphics.drawString(font, Component.literal("Anchor:"), centerX - 100f, inputY.t
     }
     
     override fun render(graphics: GuiGraphics, mouseX: Int, mouseY: Int, delta: Float) {
-        // Full screen dark background (no world visible)
         graphics.fill(0, 0, width, height, DARK_BG)
         
-        // Matrix background during download
         if (isDownloading) {
             renderMatrixBackground(graphics, downloadProgress)
         }
         
-        // Title
         graphics.drawCenteredString(font, "GOLEM COMPUTER", width / 2, 15, MATRIX_GREEN)
         
-        // Status
         if (golemUUID != null) {
             graphics.drawCenteredString(font, "✓ Golem Connected", width / 2, height - 50, 0xFF00FF00.toInt())
         } else {
             graphics.drawCenteredString(font, "✗ No Golem Connected", width / 2, height - 50, 0xFFFF0000.toInt())
         }
         
-        // Download progress
         if (isDownloading) {
             val percent = (downloadProgress / 60f * 100).toInt()
             graphics.drawCenteredString(font, "Downloading... $percent%", width / 2, height / 2, MATRIX_GREEN)
@@ -289,10 +265,10 @@ graphics.drawString(font, Component.literal("Anchor:"), centerX - 100f, inputY.t
         for (i in 0 until 50) {
             val x = random.nextInt(width)
             val y = random.nextInt(height)
-            val char = ('0'..'1').random(random)
+            val char = ('0'..'1').random()
             graphics.drawString(font, char.toString(), x, y, MATRIX_GREEN)
         }
-    val char = ('0'..'1').random()}
+    }
     
     override fun isPauseScreen() = false
 }
